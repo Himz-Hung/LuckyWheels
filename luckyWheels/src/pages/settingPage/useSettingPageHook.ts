@@ -1,3 +1,4 @@
+
 function useSettingPageHook() {
   interface DataItem {
     id: number;
@@ -13,7 +14,6 @@ function useSettingPageHook() {
     { name: "pc", quant: 2, rate: 3, id: 4 },
     { name: "vàng", quant: 1, rate: 2, id: 5 },
   ];
-
   const randomWheels = (mainData: DataItem[]): void => {
     // 1. Tạo và trộn pool số từ 1-100
     const pool: number[] = Array.from({ length: 100 }, (_, i) => i + 1);
