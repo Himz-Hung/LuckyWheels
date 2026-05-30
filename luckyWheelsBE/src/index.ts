@@ -13,6 +13,10 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/api/lucky-item", luckyItemRoute);
 
-app.listen(3000, () => {
-  console.log("Server running at port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(
+    `Server running at port ${PORT}`
+  );
 });
