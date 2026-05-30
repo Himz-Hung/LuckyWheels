@@ -9,7 +9,7 @@ const SPIN_DURATION = 5000;
 
 export default function useWheelPageHook() {
   const [items, setItems] = useState<DataItem[]>([]);
-
+  const apiUrl = import.meta.env.VITE_API_URL;
   const [rotation, setRotation] = useState(0);
 
   const [winner, setWinner] = useState<DataItem | null>(null);
@@ -23,9 +23,7 @@ export default function useWheelPageHook() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:3000/api/lucky-item"
-        );
+        const response = await axios.get(`${apiUrl}/api/lucky-item`);
         setItems(response.data);
       } catch (error) {
         console.error(error);
@@ -33,12 +31,12 @@ export default function useWheelPageHook() {
     };
 
     loadData();
-  }, []);
+  }, [apiUrl]);
 
   const claimReward = async (itemId: string) => {
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/lucky-item/claim",
+        `${apiUrl}/api/lucky-item/claim`,
         {
           itemId,
         }
