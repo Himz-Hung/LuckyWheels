@@ -1,8 +1,8 @@
 import { MoonOutlined, SunOutlined } from "@ant-design/icons";
-import { Breadcrumb, Button, ConfigProvider, Layout, Menu, theme } from "antd";
+import { Button, ConfigProvider, Layout, Menu, theme } from "antd";
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import { useMemo, useState } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 export default function MainLayout() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -29,16 +29,30 @@ interface LayoutContentProps {
 }
 
 function LayoutContent({ isDarkMode, setIsDarkMode }: LayoutContentProps) {
-  const location = useLocation();
-  const pathname = location.pathname.length > 1 ? location.pathname.replace('/', '/ ') : "/ Home";
+  const navigate = useNavigate();
+  // const location = useLocation();
+  // const pathname =
+  //   location.pathname.length > 1
+  //     ? location.pathname.replace("/", "/ ")
+  //     : "/ Home";
+  const headerBg =
+    "https://nhathuocthich24h.com/Images/Nhathuocthich24h/header_desktop_background.png";
+  const logo =
+    "https://nhathuocthich24h.com/Images/Nhathuocthich24h/logo_xoa_nen_pc.png";
   const {
-    token: { colorBgContainer, colorText, borderRadiusLG },
+    token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
-  const items = Array.from({ length: 3 }).map((_, index) => ({
-    key: String(index + 1),
-    label: `nav ${index + 1}`,
-  }));
+  // const items = [
+  //   // {
+  //   //   key: "/",
+  //   //   label: "Home",
+  //   // },
+  //   {
+  //     key: "/wheel",
+  //     label: "Wheel",
+  //   },
+  // ];
 
   return (
     <Layout
@@ -52,43 +66,83 @@ function LayoutContent({ isDarkMode, setIsDarkMode }: LayoutContentProps) {
           top: 0,
           zIndex: 1000,
           width: "100%",
+          height: 72,
+
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          background: colorBgContainer,
+
           paddingInline: 24,
-          borderBottom: "1px solid rgba(128,128,128,0.2)",
+
+          backgroundImage: `
+      linear-gradient(
+        rgba(0,0,0,.45),
+        rgba(0,0,0,.45)
+      ),
+      url(${headerBg})
+    `,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+
+          borderBottom: "1px solid rgba(255,255,255,.12)",
         }}
       >
+        {/* Logo */}
         <div
           style={{
-            color: colorText,
-            fontSize: 20,
-            fontWeight: 700,
-            marginRight: 24,
-            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            minWidth: 0,
           }}
         >
-          My App
+          <img
+            src={logo}
+            alt="logo"
+            style={{
+              width: 100,
+              height: 100,
+              objectFit: "contain",
+            }}
+          />
+
+          <span
+            style={{
+              color: "#FFEA00",
+              fontSize: 20,
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Lucky Wheels
+          </span>
         </div>
 
+        {/* Menu */}
         <Menu
-          theme={isDarkMode ? "dark" : "light"}
+          theme="dark"
           mode="horizontal"
-          defaultSelectedKeys={["1"]}
-          items={items}
+          // items={items}
+          onClick={e => navigate(e.key)}
           style={{
             flex: 1,
-            minWidth: 0,
+            justifyContent: "center",
             background: "transparent",
             borderBottom: "none",
+            marginInline: 24,
           }}
         />
 
+        {/* Theme */}
         <Button
           type="text"
           onClick={() => setIsDarkMode(prev => !prev)}
           icon={isDarkMode ? <SunOutlined /> : <MoonOutlined />}
+          style={{
+            color: "#fff",
+            fontSize: 18,
+          }}
         />
       </Header>
 
@@ -98,7 +152,7 @@ function LayoutContent({ isDarkMode, setIsDarkMode }: LayoutContentProps) {
           padding: "24px 48px",
         }}
       >
-        <Breadcrumb
+        {/* <Breadcrumb
           style={{
             marginBottom: 16,
           }}
@@ -107,7 +161,7 @@ function LayoutContent({ isDarkMode, setIsDarkMode }: LayoutContentProps) {
               title: pathname || "Home",
             },
           ]}
-        />
+        /> */}
 
         <div
           style={{
@@ -124,9 +178,10 @@ function LayoutContent({ isDarkMode, setIsDarkMode }: LayoutContentProps) {
       <Footer
         style={{
           textAlign: "center",
+          background: "#1C4686",
         }}
       >
-        Ant Design ©{new Date().getFullYear()} Created by Ant UED
+        Himz prod ©{new Date().getFullYear()} - Developed by Himz
       </Footer>
     </Layout>
   );

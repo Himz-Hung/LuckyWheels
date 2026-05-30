@@ -1,54 +1,99 @@
+import { useState } from "react";
+
+export interface LuckyItemForm {
+  name: string;
+  quantity: number;
+  probability: number;
+  cooldownSpin: number;
+  img: string;
+}
+
+export interface WheelForm {
+  name: string;
+  type: string;
+  isActive: boolean;
+  startAt: string;
+  endAt: string;
+}
 
 function useSettingPageHook() {
-  interface DataItem {
-    id: number;
-    name: string;
-    quant: number;
-    rate: number;
-  }
+  const [wheel, setWheel] = useState<WheelForm>({
+    name: "",
+    type: "",
+    isActive: true,
+    startAt: "",
+    endAt: "",
+  });
 
-  const data: DataItem[] = [
-    { name: "chuột", quant: 10, rate: 70, id: 1 },
-    { name: "phím", quant: 5, rate: 20, id: 2 },
-    { name: "màn hình", quant: 3, rate: 5, id: 3 },
-    { name: "pc", quant: 2, rate: 3, id: 4 },
-    { name: "vàng", quant: 1, rate: 2, id: 5 },
-  ];
-  const randomWheels = (mainData: DataItem[]): void => {
-    // 1. Tạo và trộn pool số từ 1-100
-    const pool: number[] = Array.from({ length: 100 }, (_, i) => i + 1);
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
+  const [items, setItems] = useState<LuckyItemForm[]>([
+    {
+      name: "",
+      quantity: 1,
+      probability: 0,
+      cooldownSpin: 0,
+      img: "",
+    },
+  ]);
 
-    // 2. Phân phối số cho từng vật phẩm
-    const randomArray = mainData.map(e => ({
-      randomNumber: pool.splice(0, e.rate),
-      key: e.id,
+  const handleWheelChange = (key: keyof WheelForm, value: string | boolean) => {
+    setWheel(prev => ({
+      ...prev,
+      [key]: value,
     }));
-
-    // 3. Quay số trúng thưởng (từ 1 đến 100)
-    const winNumber = Math.floor(Math.random() * 100) + 1;
-    console.log(`Số win: ${winNumber}`);
-
-    // 4. TỐI ƯU: Tìm item trong randomArray chứa số winNumber trước
-    const winningTicket = randomArray.find(item =>
-      item.randomNumber.includes(winNumber)
-    );
-
-    // 5. Tìm đối tượng trúng thưởng từ data gốc dựa vào key thu được
-    const winner = winningTicket
-      ? mainData.find(e => e.id === winningTicket.key)
-      : undefined;
-
-    console.log("Vật phẩm trúng thưởng:", winner);
   };
-  const state = { data };
 
-  const handler = { randomWheels };
+  const handleItemChange = (
+    index: number,
+    key: keyof LuckyItemForm,
+    value: string | number | null
+  ) => {
+    const newItems = [...items];
 
-  return { state, handler };
+    newItems[index] = {
+      ...newItems[index],
+      [key]: typeof value === "number" ? value : value ?? "",
+    };
+
+    setItems(newItems);
+  };
+
+  const addItem = () => {
+    setItems(prev => [
+      ...prev,
+      {
+        name: "",
+        quantity: 1,
+        probability: 0,
+        cooldownSpin: 0,
+        img: "",
+      },
+    ]);
+  };
+
+  const removeItem = (index: number) => {
+    setItems(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = () => {
+    console.log("WHEEL:", wheel);
+    console.log("ITEMS:", items);
+
+    // TODO: call API create wheel
+  };
+
+  return {
+    state: {
+      wheel,
+      items,
+    },
+    handler: {
+      handleWheelChange,
+      handleItemChange,
+      addItem,
+      removeItem,
+      handleSubmit,
+    },
+  };
 }
 
 export default useSettingPageHook;

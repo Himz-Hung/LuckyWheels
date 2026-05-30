@@ -6,6 +6,7 @@ import SettingPage from "../pages/settingPage/SettingPage";
 import LoginPage from "../pages/loginPage/LoginPage";
 
 import ProtectedRoute from "./ProtectedRoute";
+import WheelPage from "../pages/wheelPage/WheelPage";
 
 const HomePage = () => <h1>Home Page</h1>;
 
@@ -22,8 +23,16 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route
-            path="/"
+            path="/home"
             element={<HomePage />}
+          />
+          <Route
+            path="*"
+            element={<WheelPage />}
+          />
+          <Route
+            path="/wheel"
+            element={<WheelPage />}
           />
 
           <Route

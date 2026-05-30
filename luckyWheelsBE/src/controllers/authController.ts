@@ -1,47 +1,51 @@
 import { Request, Response } from "express";
 
-import { db } from "../config/firebase";
+import { LoginDto } from "../dtos/auth/loginDto";
+
+import { loginService } from "../services/authService";
 
 export const login = async (
   req: Request,
   res: Response
 ) => {
   try {
-    const { username, password } = req.body;
+    const body: LoginDto = req.body;
 
-    if (!username || !password) {
+    if (
+      !body.username ||
+      !body.password
+    ) {
       return res.status(400).json({
         message:
           "Username and password are required",
       });
     }
 
-    const snapshot = await db
-      .collection("users")
-      .where("username", "==", username)
-      .where("password", "==", password)
-      .get();
+    const snapshot =
+      await loginService(body);
 
     if (snapshot.empty) {
       return res.status(401).json({
-        message: "Invalid credentials",
+        message:
+          "Invalid credentials",
       });
     }
 
     const user = snapshot.docs[0];
 
-    return res.json({
+    return res.status(200).json({
       message: "Login successful",
+
       user: {
         id: user.id,
-        ...user.data(),
       },
     });
   } catch (error) {
-    console.log(error);
+    console.log("error");
 
     return res.status(500).json({
-      message: "Server Error",
+      message:
+        "Internal server error",
     });
   }
 };
