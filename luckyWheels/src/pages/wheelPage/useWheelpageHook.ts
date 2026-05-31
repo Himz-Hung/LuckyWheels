@@ -32,7 +32,15 @@ export default function useWheelPageHook() {
 
     loadData();
   }, [apiUrl]);
+  const refreshItems = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/api/lucky-item`);
 
+      setItems(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   // const claimReward = async (itemId: string) => {
   //   try {
   //     const response = await axios.post(`${apiUrl}/api/lucky-item/claim`, {
@@ -78,6 +86,8 @@ export default function useWheelPageHook() {
       return;
     }
 
+    setIsSpinning(true);
+
     try {
       const response = await axios.post(`${apiUrl}/api/lucky-item/spin`);
 
@@ -86,11 +96,15 @@ export default function useWheelPageHook() {
       const winnerIndex = items.findIndex(item => item.id === result.id);
 
       if (winnerIndex === -1) {
-        setMessage("Không tìm thấy phần thưởng");
+        await refreshItems();
+
+        setMessage("Dữ liệu vòng quay đã thay đổi, vui lòng quay lại.");
+
+        setIsSpinning(false);
+
         return;
       }
 
-      setIsSpinning(true);
       setOpenPopup(false);
 
       const slice = 360 / items.length;
@@ -116,27 +130,19 @@ export default function useWheelPageHook() {
 
       setRotation(nextRotation);
 
-      setTimeout(() => {
+      setTimeout(async () => {
         setWinner(result);
 
         setMessage(`Chúc mừng bạn nhận được ${result.name}`);
 
-        if (response.data.deleted) {
-          setItems(prev => prev.filter(item => item.id !== result.id));
-        } else {
-          setItems(prev =>
-            prev.map(item =>
-              item.id === result.id
-                ? {
-                    ...item,
-                    quantity: response.data.quantity,
-                  }
-                : item
-            )
-          );
+        setOpenPopup(true);
+
+        try {
+          await refreshItems();
+        } catch (error) {
+          console.error(error);
         }
 
-        setOpenPopup(true);
         setIsSpinning(false);
       }, SPIN_DURATION);
     } catch (error) {
