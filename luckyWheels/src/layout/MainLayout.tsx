@@ -166,7 +166,7 @@ function LayoutContent({ isDarkMode, setIsDarkMode }: LayoutContentProps) {
         <div
           style={{
             minHeight: "calc(100vh - 250px)",
-            padding: 24,
+            padding: 0,
             background: colorBgContainer,
             borderRadius: borderRadiusLG,
           }}

@@ -229,6 +229,12 @@ export default function WheelPage() {
                   CENTER +
                   itemRadius * Math.sin(((middleAngle - 90) * Math.PI) / 180);
 
+                const lines = handler.splitText(item.name, 12);
+
+                const imageY = itemY - CARD_SIZE * 0.18;
+
+                const textY = itemY + CARD_SIZE * 0.25;
+
                 return (
                   <g key={item.id ?? index}>
                     <path
@@ -252,7 +258,7 @@ export default function WheelPage() {
 
                     <circle
                       cx={itemX}
-                      cy={itemY - CARD_SIZE * 0.18}
+                      cy={imageY}
                       r={IMAGE_SIZE / 2}
                       fill="#fff"
                     />
@@ -263,7 +269,7 @@ export default function WheelPage() {
                           <clipPath id={`clip-${index}`}>
                             <circle
                               cx={itemX}
-                              cy={itemY - CARD_SIZE * 0.18}
+                              cy={imageY}
                               r={IMAGE_SIZE * 0.45}
                             />
                           </clipPath>
@@ -272,7 +278,7 @@ export default function WheelPage() {
                         <image
                           href={item.img}
                           x={itemX - IMAGE_SIZE * 0.45}
-                          y={itemY - CARD_SIZE * 0.18 - IMAGE_SIZE * 0.45}
+                          y={imageY - IMAGE_SIZE * 0.45}
                           width={IMAGE_SIZE * 0.9}
                           height={IMAGE_SIZE * 0.9}
                           clipPath={`url(#clip-${index})`}
@@ -282,39 +288,50 @@ export default function WheelPage() {
 
                     <text
                       x={itemX}
-                      y={itemY + CARD_SIZE * 0.18}
+                      y={textY - ((lines.length - 1.5) * SVG_SIZE * 0.012) / 2}
                       textAnchor="middle"
                       fill="#fff"
-                      fontSize={isMobile ? SVG_SIZE * 0.018 : SVG_SIZE * 0.020}
+                      fontSize={isMobile ? SVG_SIZE * 0.018 : SVG_SIZE * 0.02}
                       fontWeight="800"
                       filter="url(#textShadow)"
                     >
-                      {item.name}
+                      {lines.map((line, lineIndex) => (
+                        <tspan
+                          key={lineIndex}
+                          x={itemX}
+                          dy={lineIndex === 0 ? 0 : "1.2em"}
+                        >
+                          {line}
+                        </tspan>
+                      ))}
                     </text>
 
+                    {/* Quantity */}
                     {/* <g>
-                      <rect
-                        x={itemX - 20}
-                        y={itemY + CARD_SIZE * 0.25}
-                        width="40"
-                        height="18"
-                        rx="9"
-                        fill="#fff"
-                      />
-
-                      <text
-                        x={itemX}
-                        y={itemY + CARD_SIZE * 0.4}
-                        textAnchor="middle"
-                        fill="#DC2626"
-                        fontWeight="700"
-                        fontSize={
-                          isMobile ? SVG_SIZE * 0.013 : SVG_SIZE * 0.015
-                        }
-                      >
-                        x{item.quantity}
-                      </text>
-                    </g> */}
+                        <rect
+                          x={itemX - 20}
+                          y={itemY + CARD_SIZE * 0.25}
+                          width="40"
+                          height="18"
+                          rx="9"
+                          fill="#fff"
+                        />
+                  
+                        <text
+                          x={itemX}
+                          y={itemY + CARD_SIZE * 0.4}
+                          textAnchor="middle"
+                          fill="#DC2626"
+                          fontWeight="700"
+                          fontSize={
+                            isMobile
+                              ? SVG_SIZE * 0.013
+                              : SVG_SIZE * 0.015
+                          }
+                        >
+                          x{item.quantity}
+                        </text>
+                      </g> */}
                   </g>
                 );
               })}

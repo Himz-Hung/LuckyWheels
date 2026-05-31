@@ -6,6 +6,7 @@ import {
     claimLuckyItemService,
   createLuckyItemService,
   getLuckyItemsService,
+  spinLuckyItemService,
 } from "../services/luckyItemService";
 
 export const createLuckyItem = async (req: Request, res: Response) => {
@@ -77,6 +78,23 @@ export const claimLuckyItem = async (req: Request, res: Response) => {
       message: "Item claimed successfully",
       ...result,
     });
+  } catch (error: any) {
+    return res.status(400).json({
+      message: error.message,
+    });
+  }
+};
+export const spinLuckyItem = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const result =
+      await spinLuckyItemService();
+
+    return res.status(200).json(
+      result
+    );
   } catch (error: any) {
     return res.status(400).json({
       message: error.message,

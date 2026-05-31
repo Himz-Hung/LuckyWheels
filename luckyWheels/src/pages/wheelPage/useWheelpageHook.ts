@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 import type { DataItem } from "../../models/wheelItemsModel";
-import randomWheels from "../../services/randomAlgorithm";
+// import randomWheels from "../../services/randomAlgorithm";
 
 const SPIN_DURATION = 5000;
 
@@ -33,45 +33,42 @@ export default function useWheelPageHook() {
     loadData();
   }, [apiUrl]);
 
-  const claimReward = async (itemId: string) => {
-    try {
-      const response = await axios.post(
-        `${apiUrl}/api/lucky-item/claim`,
-        {
-          itemId,
-        }
-      );
+  // const claimReward = async (itemId: string) => {
+  //   try {
+  //     const response = await axios.post(`${apiUrl}/api/lucky-item/claim`, {
+  //       itemId,
+  //     });
 
-      const result = response.data;
+  //     const result = response.data;
 
-      if (result.deleted) {
-        setItems(prev => prev.filter(item => item.id !== itemId));
-      } else {
-        setItems(prev =>
-          prev.map(item =>
-            item.id === itemId
-              ? {
-                  ...item,
-                  quantity: result.quantity,
-                }
-              : item
-          )
-        );
-      }
+  //     if (result.deleted) {
+  //       setItems(prev => prev.filter(item => item.id !== itemId));
+  //     } else {
+  //       setItems(prev =>
+  //         prev.map(item =>
+  //           item.id === itemId
+  //             ? {
+  //                 ...item,
+  //                 quantity: result.quantity,
+  //               }
+  //             : item
+  //         )
+  //       );
+  //     }
 
-      return true;
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response) {
-        setMessage(error.response.data?.message ?? "Phần thưởng đã hết");
-      } else {
-        setMessage("Đã xảy ra lỗi không xác định");
-      }
+  //     return true;
+  //   } catch (error: unknown) {
+  //     if (axios.isAxiosError(error) && error.response) {
+  //       setMessage(error.response.data?.message ?? "Phần thưởng đã hết");
+  //     } else {
+  //       setMessage("Đã xảy ra lỗi không xác định");
+  //     }
 
-      setItems(prev => prev.filter(item => item.id !== itemId));
+  //     setItems(prev => prev.filter(item => item.id !== itemId));
 
-      return false;
-    }
-  };
+  //     return false;
+  //   }
+  // };
 
   const spin = async () => {
     if (isSpinning) return;
@@ -81,60 +78,98 @@ export default function useWheelPageHook() {
       return;
     }
 
-    const result = randomWheels(items);
+    try {
+      const response = await axios.post(`${apiUrl}/api/lucky-item/spin`);
 
-    if (!result) {
-      setMessage("Không còn phần thưởng nào");
-      return;
-    }
+      const result = response.data.reward;
 
-    const winnerIndex = items.findIndex(item => item.id === result.id);
+      const winnerIndex = items.findIndex(item => item.id === result.id);
 
-    if (winnerIndex === -1) return;
-
-    setIsSpinning(true);
-    setOpenPopup(false);
-
-    const slice = 360 / items.length;
-
-    const margin = slice * 0.15;
-
-    const randomInsideSlice = margin + Math.random() * (slice - margin * 2);
-
-    const targetSliceAngle = winnerIndex * slice + randomInsideSlice;
-
-    const stopAngle = (360 - targetSliceAngle) % 360;
-
-    const currentRotation = ((rotation % 360) + 360) % 360;
-
-    const rounds = Math.floor(Math.random() * 5) + 8;
-
-    const wobble = (Math.random() - 0.5) * 1.5;
-
-    const deltaRotation =
-      ((stopAngle - currentRotation + 360) % 360) + rounds * 360;
-
-    const nextRotation = rotation + deltaRotation + wobble;
-
-    setRotation(nextRotation);
-
-    setTimeout(async () => {
-      const success = await claimReward(String(result.id));
-
-      if (!success) {
-        setIsSpinning(false);
+      if (winnerIndex === -1) {
+        setMessage("Không tìm thấy phần thưởng");
         return;
       }
 
-      setWinner(result);
+      setIsSpinning(true);
+      setOpenPopup(false);
 
-      setMessage(`Chúc mừng bạn nhận được ${result.name}`);
+      const slice = 360 / items.length;
 
-      setOpenPopup(true);
+      const margin = slice * 0.15;
+
+      const randomInsideSlice = margin + Math.random() * (slice - margin * 2);
+
+      const targetSliceAngle = winnerIndex * slice + randomInsideSlice;
+
+      const stopAngle = (360 - targetSliceAngle) % 360;
+
+      const currentRotation = ((rotation % 360) + 360) % 360;
+
+      const rounds = Math.floor(Math.random() * 5) + 8;
+
+      const wobble = (Math.random() - 0.5) * 1.5;
+
+      const deltaRotation =
+        ((stopAngle - currentRotation + 360) % 360) + rounds * 360;
+
+      const nextRotation = rotation + deltaRotation + wobble;
+
+      setRotation(nextRotation);
+
+      setTimeout(() => {
+        setWinner(result);
+
+        setMessage(`Chúc mừng bạn nhận được ${result.name}`);
+
+        if (response.data.deleted) {
+          setItems(prev => prev.filter(item => item.id !== result.id));
+        } else {
+          setItems(prev =>
+            prev.map(item =>
+              item.id === result.id
+                ? {
+                    ...item,
+                    quantity: response.data.quantity,
+                  }
+                : item
+            )
+          );
+        }
+
+        setOpenPopup(true);
+        setIsSpinning(false);
+      }, SPIN_DURATION);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setMessage(error.response?.data?.message ?? "Không thể quay");
+      }
+
       setIsSpinning(false);
-    }, SPIN_DURATION);
+    }
   };
+  const splitText = (text: string, maxLength = 10) => {
+    const words = text.split(" ");
+    const lines: string[] = [];
 
+    let currentLine = "";
+
+    words.forEach(word => {
+      const testLine = currentLine ? `${currentLine} ${word}` : word;
+
+      if (testLine.length > maxLength) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = testLine;
+      }
+    });
+
+    if (currentLine) {
+      lines.push(currentLine);
+    }
+
+    return lines;
+  };
   return {
     state: {
       items,
@@ -146,6 +181,7 @@ export default function useWheelPageHook() {
     },
 
     handler: {
+      splitText,
       spin,
       setOpenPopup,
     },
